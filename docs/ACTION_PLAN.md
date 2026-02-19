@@ -1,6 +1,12 @@
 # Action Plan: Step-by-Step Implementation
 
-## Current Status: Phase 0 - Setup
+## Current Status: Phase 1 - Building Backend
+
+✅ Phase 0 Complete:
+- Instance: https://dev275533.service-now.com/
+- Story table: rm_story (field: story_points)
+- Sprint table: rm_sprint
+- GitHub: https://github.com/usmansafk/servicenow-sprint-pointing.git
 
 ---
 
