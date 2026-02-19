@@ -3,12 +3,6 @@
 ## Project Overview
 A modern planning poker application built directly into ServiceNow to eliminate third-party tools and streamline sprint refinement sessions.
 
-## Competition Details
-- **Objective**: Demonstrate impactful use of Kiro IDE for ServiceNow development
-- **Timeline**: Feb 5 - March 2, 2026
-- **Judge**: VP John Morton
-- **Prize**: $200 Motivosity + street cred
-
 ## MVP Features
 - Real-time planning poker voting interface
 - Anonymous voting with moderator-controlled reveal
