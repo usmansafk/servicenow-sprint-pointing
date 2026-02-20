@@ -16,11 +16,3 @@ A modern planning poker application built directly into ServiceNow to eliminate 
 - **Instance**: PDI (Personal Developer Instance)
 - **Version Control**: GitHub
 
-## Project Status
-🚧 Phase 0: Environment Setup (In Progress)
-
-## Next Steps
-1. Connect Kiro to ServiceNow instance
-2. Set up GitHub repository
-3. Design data model and API
-4. Build MVP features
