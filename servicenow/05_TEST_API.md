@@ -40,20 +40,20 @@ First, we need some stories to test with.
 ### 2. Test: Create Session
 
 1. In REST API Explorer:
-   - **Namespace**: Select `x_sprint_pointing`
-   - **API Name**: Select `sprint_pointing`
+   - **Namespace**: Select `x_1326913_sp_point`
+   - **API Name**: Select `sprint_pointing_api`
    - **API Version**: v1
    - **Resource**: POST `/session/create`
 
-2. In the **Request Body**, paste (replace with your story sys_ids):
+2. In the **Request Body**, paste (use your actual story sys_ids):
 
 ```json
 {
   "session_name": "Test Sprint Refinement",
   "story_ids": [
-    "YOUR_STORY_SYS_ID_1",
-    "YOUR_STORY_SYS_ID_2",
-    "YOUR_STORY_SYS_ID_3"
+    "63cc81ff8387b2104408c8efeeaad3cb",
+    "bb807c549356a6d4aaf77d5e1dba101f",
+    "d3c8d82b47f5ea94f8c4fd5b416d431a"
   ],
   "sprint_id": ""
 }
@@ -211,5 +211,13 @@ Proceed to: `06_CREATE_UI.md`
 ## Quick Reference: Your API Base URL
 
 ```
-https://dev275533.service-now.com/api/x_sprint_pointing/sprint_pointing/v1
+https://dev275533.service-now.com/api/x_1326913_sp_point/sprint_pointing_api/v1
 ```
+
+## Your Configuration
+- Scope: `x_1326913_sp_point`
+- API ID: `sprint_pointing_api`
+- Test Stories:
+  - STRY0010002: `63cc81ff8387b2104408c8efeeaad3cb`
+  - STRY0297300: `bb807c549356a6d4aaf77d5e1dba101f`
+  - STRY0295392: `d3c8d82b47f5ea94f8c4fd5b416d431a`
