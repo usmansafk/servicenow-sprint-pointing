@@ -238,38 +238,97 @@ if (rmStoryGR.get(storyGR.getValue('story'))) {
 
 ## 6. Update Participant Tracking
 
-Update the `getSessionState` function to track who has voted:
+**Location**: In your **SprintPointingAPI** Script Include, in the `getSessionState` function.
+
+**Where to add**: At the very end of the `getSessionState` function, just before the `return result;` statement.
+
+**Full context**:
 
 ```javascript
-// After getting participants, check who has voted for current story
-if (result.current_story) {
-    var currentStoryId = result.current_story.sys_id;
-    var currentRound = result.current_story.round || 1;
-    
-    // Get votes for current story/round
-    var voteGR = new GlideRecord('x_1326913_sp_point_vote');
-    voteGR.addQuery('session_story', currentStoryId);
-    voteGR.addQuery('round', currentRound);
-    voteGR.query();
-    
-    var voterIds = [];
-    while (voteGR.next()) {
-        voterIds.push(voteGR.getValue('voter'));
+// In SprintPointingAPI Script Include
+// Find the getSessionState function
+
+getSessionState: function(sessionCode) {
+    try {
+        var currentUser = gs.getUserID();
+        
+        // ... existing code to get session, stories, participants ...
+        
+        // Get participants (existing code)
+        var participantGR = new GlideAggregate(this.voteTable);
+        participantGR.addQuery('session_story.session', sessionId);
+        participantGR.groupBy('voter');
+        participantGR.query();
+
+        while (participantGR.next()) {
+            var voterId = participantGR.getValue('voter');
+            var userGR = new GlideRecord('sys_user');
+            if (userGR.get(voterId)) {
+                result.participants.push({
+                    user_id: voterId,
+                    name: userGR.getValue('name')
+                });
+            }
+        }
+        
+        // ===== ADD THIS NEW CODE HERE (before return) =====
+        // Track who has voted for current story
+        if (result.current_story) {
+            var currentStoryId = result.current_story.sys_id;
+            var currentRound = result.current_story.round || 1;
+            
+            // Get votes for current story/round
+            var voteGR = new GlideRecord(this.voteTable);
+            voteGR.addQuery('session_story', currentStoryId);
+            voteGR.addQuery('round', currentRound);
+            voteGR.query();
+            
+            var voterIds = [];
+            while (voteGR.next()) {
+                voterIds.push(voteGR.getValue('voter'));
+            }
+            
+            // Update participant has_voted status
+            result.participants.forEach(function(p) {
+                p.has_voted = voterIds.indexOf(p.user_id) !== -1;
+            });
+        }
+        // ===== END NEW CODE =====
+
+        return result;
+
+    } catch (e) {
+        gs.error('Error getting session state: ' + e.message);
+        return {success: false, error: e.message};
     }
-    
-    // Update participant has_voted status
-    result.participants.forEach(function(p) {
-        p.has_voted = voterIds.indexOf(p.user_id) !== -1;
-    });
-}
-```
+},
 
 ---
 
 ## 7. Server Script Update
 
-Update your widget's Server Script to handle sprint selection:
+**Widget**: Yes, the **Sprint Pointing App** widget
 
+**Location**: In the widget's **Server Script** section
+
+**Action**: REPLACE the entire existing Server Script with this code
+
+**Current Server Script** (v1):
+```javascript
+(function() {
+  // Get session code from URL parameter
+  var sessionCode = $sp.getParameter('session');
+  
+  if (sessionCode) {
+    data.session_code = sessionCode;
+  } else {
+    // Default for testing
+    data.session_code = 'GNHDWS';
+  }
+})();
+```
+
+**New Server Script** (v2):
 ```javascript
 (function() {
     // Get session code from URL parameter
@@ -279,7 +338,7 @@ Update your widget's Server Script to handle sprint selection:
         data.session_code = sessionCode;
     }
     
-    // Handle server-side actions
+    // Handle server-side actions (for future session creation UI)
     if (input && input.action) {
         switch (input.action) {
             case 'getSprints':
@@ -296,6 +355,7 @@ Update your widget's Server Script to handle sprint selection:
         }
     }
     
+    // Helper functions
     function getSprints() {
         var sprints = [];
         var gr = new GlideRecord('rm_sprint');
@@ -338,6 +398,8 @@ Update your widget's Server Script to handle sprint selection:
     }
 })();
 ```
+
+**Note**: The helper functions (`getSprints`, `getSprintStories`, `createSession`) are for future use when you build the session creation UI. They won't be called in v2 MVP, but they're ready for when you need them.
 
 ---
 
