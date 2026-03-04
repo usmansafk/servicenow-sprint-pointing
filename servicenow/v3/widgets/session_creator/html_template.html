@@ -1,0 +1,382 @@
+<!--
+  Session Creator Widget - HTML Template
+  V3 Enhancement: Session Link Copy Functionality
+  
+  This template provides the UI for creating sprint pointing sessions
+  with V3 enhancements for session link copying.
+  
+  Requirements: 2.1, 2.2, 2.3, 2.4, 2.5
+-->
+
+<div class="session-creator-widget">
+  <!-- Error Message -->
+  <div ng-if="c.error" class="alert alert-danger alert-dismissible" role="alert">
+    <button type="button" class="close" ng-click="c.dismissError()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    {{c.error}}
+  </div>
+  
+  <!-- Toast Notification -->
+  <div ng-if="c.toastVisible" class="toast-notification">
+    {{c.toastMessage}}
+  </div>
+  
+  <!-- Session Creation Form -->
+  <div ng-if="!c.createdSession" class="session-form">
+    <h2>Create Sprint Pointing Session</h2>
+    
+    <!-- Session Name -->
+    <div class="form-group">
+      <label for="session-name">Session Name</label>
+      <input 
+        type="text" 
+        id="session-name"
+        class="form-control" 
+        ng-model="c.sessionName"
+        placeholder="Enter session name"
+        ng-disabled="c.loading">
+    </div>
+    
+    <!-- Sprint Selection -->
+    <div class="form-group">
+      <label for="sprint-select">Sprint</label>
+      <select 
+        id="sprint-select"
+        class="form-control" 
+        ng-model="c.selectedSprint"
+        ng-change="c.onSprintSelected()"
+        ng-disabled="c.loading || c.loadingSprints">
+        <option value="">Select a sprint...</option>
+        <option ng-repeat="sprint in c.sprints" value="{{sprint.sys_id}}">
+          {{sprint.name}}
+        </option>
+      </select>
+      <div ng-if="c.loadingSprints" class="loading-indicator">
+        Loading sprints...
+      </div>
+    </div>
+    
+    <!-- Stories List -->
+    <div class="form-group" ng-if="c.selectedSprint">
+      <label>Stories ({{c.stories.length}})</label>
+      <div ng-if="c.loadingStories" class="loading-indicator">
+        Loading stories...
+      </div>
+      <div ng-if="!c.loadingStories && c.stories.length === 0" class="alert alert-info">
+        No stories found for this sprint
+      </div>
+      <div ng-if="!c.loadingStories && c.stories.length > 0" class="stories-list">
+        <div ng-repeat="story in c.stories" class="story-item">
+          <span class="story-number">{{story.number}}</span>
+          <span class="story-description">{{story.short_description}}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Create Button -->
+    <div class="form-group">
+      <button 
+        class="btn btn-primary btn-lg"
+        ng-click="c.createSession()"
+        ng-disabled="!c.canCreate()">
+        <span ng-if="!c.loading">Create Session</span>
+        <span ng-if="c.loading">Creating...</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Session Created Success -->
+  <div ng-if="c.createdSession" class="session-created">
+    <h2>Session Created Successfully!</h2>
+    
+    <div class="session-info">
+      <div class="info-item">
+        <label>Session Name:</label>
+        <span>{{c.createdSession.session_name}}</span>
+      </div>
+      
+      <div class="info-item">
+        <label>Session Code:</label>
+        <div class="code-container">
+          <span class="session-code">{{c.createdSession.session_code}}</span>
+          <button 
+            class="btn btn-sm btn-secondary"
+            ng-click="c.copyCode()"
+            title="Copy code">
+            <i class="fa fa-copy"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- V3 Enhancement: Session Link with Copy Functionality -->
+      <div class="info-item">
+        <label>Session Link:</label>
+        <div class="link-container">
+          <input 
+            type="text" 
+            id="session-link-field"
+            class="form-control session-link-field"
+            ng-model="c.sessionUrl"
+            ng-click="c.copySessionLink()"
+            readonly
+            title="Click to copy link">
+          <button 
+            class="btn btn-sm btn-secondary copy-icon-button"
+            ng-click="c.copySessionLink()"
+            title="Copy link">
+            <i class="fa fa-copy"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="action-buttons">
+      <a 
+        href="{{c.sessionUrl}}" 
+        class="btn btn-primary btn-lg"
+        target="_blank">
+        Open Session
+      </a>
+      <button 
+        class="btn btn-secondary"
+        ng-click="c.reset()">
+        Create Another Session
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .session-creator-widget {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .session-form h2,
+  .session-created h2 {
+    margin-bottom: 24px;
+    color: #333;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+  }
+  
+  .loading-indicator {
+    padding: 10px;
+    color: #666;
+    font-style: italic;
+  }
+  
+  .stories-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+  }
+  
+  .story-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .story-item:last-child {
+    border-bottom: none;
+  }
+  
+  .story-number {
+    font-weight: 600;
+    color: #4CAF50;
+    margin-right: 10px;
+  }
+  
+  .story-description {
+    color: #333;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-primary {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    background-color: #45a049;
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+  
+  .btn-lg {
+    padding: 12px 30px;
+    font-size: 16px;
+  }
+  
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .session-info {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  
+  .info-item {
+    margin-bottom: 16px;
+  }
+  
+  .info-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .info-item label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .code-container,
+  .link-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .session-code {
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: #4CAF50;
+    padding: 8px 12px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    flex: 1;
+  }
+  
+  /* V3 Enhancement: Session Link Field Styling */
+  .session-link-field {
+    flex: 1;
+    cursor: pointer;
+    user-select: all;
+  }
+  
+  .session-link-field:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .copy-icon-button {
+    flex-shrink: 0;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  /* V3 Enhancement: Toast Notification Styling */
+  .toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .alert {
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+  
+  .alert-info {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+  }
+  
+  .alert-dismissible .close {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.5;
+  }
+  
+  .alert-dismissible .close:hover {
+    opacity: 1;
+  }
+</style>
